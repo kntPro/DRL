@@ -27,6 +27,7 @@ class Model(nn.Module):
 class DQN():
     def __init__(self,obsShape,actShape,device):
         self.model = Model(obsShape,actShape).to(device)
+        self.optimizer = torch.optim.SGD(self.model.parameters(),lr=1e-3)
 
     def sample_action(self,x):
         logits = self.model(x)

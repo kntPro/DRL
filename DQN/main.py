@@ -6,18 +6,18 @@ from dqn import *
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
-EXP_SIZE = int(1e2)
+
 GAMMA = 0.9
 EPSILON = 0.1
 NUM_EPI = int(1e5)
-NUM_STEP = int(1e2)
+NUM_STEP = int(1e4)
 INTERVAL = 100
 
 
 def main():
     env = gym.make('CartPole-v1')
     state,_ = env.reset()
-    memory = Memory(EXP_SIZE,1,env.observation_space.shape[0])    
+    memory = Memory(NUM_STEP,1,env.observation_space.shape[0])    
     agent = DQN(2,env.observation_space.shape[0],GAMMA,EPSILON)
     rewardEpi = np.zeros(NUM_EPI)
     done = False

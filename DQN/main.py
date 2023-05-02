@@ -5,13 +5,8 @@ from memory import *
 from dqn import *
 from tqdm import tqdm
 from matplotlib import pyplot as plt
-
-
-GAMMA = 0.9
-EPSILON = 0.1
-NUM_EPI = int(1e5)
-NUM_STEP = int(1e4)
-INTERVAL = 100
+import os
+from config import *
 
 
 def main():
@@ -44,6 +39,9 @@ def main():
         if((i % INTERVAL) == 0):
             print(f'\n {i}:reward max:{max(rewardEpi[i-INTERVAL:], default=None)}, mean:{np.mean(rewardEpi[i-INTERVAL:])}, min:{min(rewardEpi[i-INTERVAL:])}')
 
+    env.close()
+
+    torch.save(agent.model,DQN_PARAM_PATH)
 
     fig = plt.figure()
     x = np.arange(len(rewardEpi))

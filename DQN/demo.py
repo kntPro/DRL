@@ -22,15 +22,6 @@ for i in tqdm(range(100)):
 
     state, _ = env.reset()
     done = False
-
-fig = plt.figure()
-x = np.arange(len(action_his))
-ax = fig.add_subplot(111)
-ax.set_xlabel('num')
-ax.set_ylabel('action')
-ax.plot(x,action_his)
-plt.savefig('action_history.svg')
-plt.show()
         
 
 env.close()

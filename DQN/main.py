@@ -41,7 +41,7 @@ def main():
 
     env.close()
 
-    torch.save(agent.model,DQN_PARAM_PATH)
+    torch.save(agent.model,DQN_PARAM_PATH+str(NUM_EPI))
 
     fig = plt.figure()
     x = np.arange(len(rewardEpi))

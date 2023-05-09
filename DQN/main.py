@@ -20,7 +20,7 @@ def main():
     
     for i in tqdm(range(NUM_EPI)):
         for _ in range(NUM_STEP):
-            action = agent.sample_action(state)
+            action = agent.sample_action(torch.tensor(state))
             next_state, reward, terminate,truncate,_ = env.step(action)
             done = (terminate or truncate)
             rewardEpi[i] += reward

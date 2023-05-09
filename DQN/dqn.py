@@ -16,7 +16,8 @@ class Model(nn.Module):
 
     @torch.autocast(device_type='cuda')
     def forward(self,x):
-        x1 = torch.tensor(x,dtype=torch.float32,requires_grad=True).clone().detach().requires_grad_(True).cuda()
+        #x1 = torch.tensor(x,dtype=torch.float32,requires_grad=True).clone().detach().requires_grad_(True).cuda()
+        x1 = x.clone().detach().requires_grad_(True).cuda()
         x2 = self.first(x1)
         x3 = self.firstAct(x2)
         x4 = self.second(x3)

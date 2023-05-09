@@ -1,6 +1,8 @@
 import numpy as np
 import torch
 import torch.nn as nn
+from dqn import *
+from config import *
 '''a = [[1.,2.,3.,4.],[5.,6.,7.,8.]]
 na = np.array(a)
 ta = torch.tensor(na)
@@ -35,6 +37,7 @@ device = (
 )
 model = NeuralNetwork().to(device)
 
+'''
 X = torch.rand(1, 28, 28, device=device)
 logits = model(X)
 pred_probab = nn.Softmax(dim=1)(logits)
@@ -44,7 +47,7 @@ print(f"Predicted class: {y_pred}")
 #tensor([[ 0.0820, -0.0153, -0.1121,  0.0854, -0.0653,  0.1364,  0.0372, -0.0080,
 #         -0.0267,  0.0210]], device='cuda:0', grad_fn=<AddmmBackward0>)
 #Predicted class: tensor([5], device='cuda:0')
-
+'''
 
 
 class FuncNeuralNetwork(nn.Module):
@@ -69,6 +72,7 @@ class FuncNeuralNetwork(nn.Module):
 
         return y,z
 
+'''
 FModel = FuncNeuralNetwork().to(device)
 print(FModel)
 X = torch.rand(1,28,28,device=device)
@@ -79,5 +83,20 @@ print(f"logits1: {logits1}")
 print(f"probab1: {pred_probab1}")
 print(f"logits2: {logits2}")
 print(f"probab2: {pred_probab2}")
+'''
+
+agent = DQN(2,4,GAMMA,EPSILON)
+X = torch.rand(1,4,dtype=torch.float32)
+print(X)
+predict = agent.model(X)
+print(f"predict:{predict}")
+act = predict[0,1].requires_grad_(True)
+a = torch.tensor(1.).cuda()
+print(f'act:{act}')
+print(f'type:{type(act)}')
+print(f'a-predict:{a-predict}')
+print(f'a-act:{a-act}')
+
+print(agent.model(np.arange(4)))
 
 

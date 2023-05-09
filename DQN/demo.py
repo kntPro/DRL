@@ -8,8 +8,8 @@ from tqdm import tqdm
 
 env = gym.make('CartPole-v1', render_mode='human')
 state, _ = env.reset()
-agent = DQN(2,env.observation_space.shape[0],GAMMA,EPSILON)
-agent.model = torch.load(DQN_PARAM_PATH)
+agent = DQN(2,env.observation_space.shape[0],GAMMA,EPSILON,False)
+agent.model = torch.load(DQN_PARAM_PATH+str(NUM_EPI))
 done = False
 action_his = np.array([])
 

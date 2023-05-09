@@ -26,8 +26,8 @@ def main():
             rewardEpi[i] += reward
             memory.add(action,state,reward,next_state,done)
 
-            act, stat, rew, next_stat, done = memory.randomSample()
-            agent.update_parameter(stat,rew,next_stat,done)
+            act, stat, rew, next_stat, do = memory.randomSample()
+            agent.update_parameter(act,stat,rew,next_stat,do)
 
             if(done):
                 break
@@ -36,8 +36,8 @@ def main():
         memory.reset()
         done = False
 
-        if((i % INTERVAL) == 0):
-            print(f'\n {i}:reward max:{max(rewardEpi[i-INTERVAL:], default=None)}, mean:{np.mean(rewardEpi[i-INTERVAL:])}, min:{min(rewardEpi[i-INTERVAL:])}')
+        if(((i % INTERVAL) == 0) and (i != 0)):
+            print(f'\n {i}:reward max:{max(rewardEpi[i-INTERVAL:i], default=None)}, mean:{np.mean(rewardEpi[i-INTERVAL:i])}, min:{min(rewardEpi[i-INTERVAL:i])}')
 
     env.close()
 

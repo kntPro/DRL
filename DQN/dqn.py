@@ -16,7 +16,7 @@ class Model(nn.Module):
 
     @torch.autocast(device_type='cuda')
     def forward(self,x):
-        x1 = torch.tensor(x,dtype=torch.float32).cuda()
+        x1 = torch.tensor(x,dtype=torch.float32,requires_grad=True).clone().detach().requires_grad_(True).cuda()
         x2 = self.first(x1)
         x3 = self.firstAct(x2)
         x4 = self.second(x3)
@@ -27,14 +27,15 @@ class Model(nn.Module):
     
 
 class DQN():
-    def __init__(self,actShape,obsShape,gamma,epsilon):
+    def __init__(self,actShape,obsShape,gamma,epsilon,training=True):
         self.model = Model(obsShape,actShape).to('cuda')
         self.optimizer = torch.optim.SGD(self.model.parameters(),lr=5e-2)
         self.gamma = gamma
         self.epsilon = epsilon
+        self.traing = training
 
     def sample_action(self,x):
-        if self.epsilon < np.random.rand():
+        if (self.epsilon < np.random.rand()) and self.traing:
             logits = self.model(x)
             probab = nn.Softmax(dim=0)(logits)
             tensorPredict = torch.argmax(probab).detach()
@@ -44,13 +45,14 @@ class DQN():
 
         return predict
 
-    def update_parameter(self, obs, reward, next_obs, done):
+    def update_parameter(self, act, obs, reward, next_obs, done):
         if done == True:
             y = reward
         else:
             y = reward + self.gamma * torch.max(self.model(next_obs))
-        
-        loss = torch.sum(torch.pow(y-self.model(obs),2))
+
+        x = self.model(obs)[int(act.item())]
+        loss = torch.pow(y-x,2)
 
         self.optimizer.zero_grad()
         loss.backward()

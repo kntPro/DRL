@@ -15,6 +15,7 @@ def main():
     memory = Memory(NUM_STEP,1,env.observation_space.shape[0])    
     agent = DQN(2,env.observation_space.shape[0],GAMMA,EPSILON)
     rewardEpi = np.zeros(NUM_EPI)
+    lossEpi =  np.zeros(NUM_EPI)
     done = False
     #train
     
@@ -27,7 +28,7 @@ def main():
             memory.add(action,state,reward,next_state,done)
 
             act, stat, rew, next_stat, do = memory.randomSample()
-            agent.update_parameter(act,stat,rew,next_stat,do)
+            lossEpi[i] += agent.update_parameter(act,stat,rew,next_stat,do)
 
             if(done):
                 break
@@ -37,8 +38,8 @@ def main():
         done = False
 
         if(((i % INTERVAL) == 0) and (i != 0)):
-            print(f'\n {i}:reward max:{max(rewardEpi[i-INTERVAL:i], default=None)}, mean:{np.mean(rewardEpi[i-INTERVAL:i])}, min:{min(rewardEpi[i-INTERVAL:i])}')
-
+            print(f'\n {i}:reward max:{max(rewardEpi[i-INTERVAL:i])}, mean:{np.mean(rewardEpi[i-INTERVAL:i])}, min:{min(rewardEpi[i-INTERVAL:i])}')
+            print(f' {i}:loss max:{max(lossEpi[i-INTERVAL:i])}, mean:{np.mean(lossEpi[i-INTERVAL:i])}, min:{min(lossEpi[i-INTERVAL:i])}\n')
     env.close()
 
     torch.save(agent.model,DQN_PARAM_PATH+str(NUM_EPI))

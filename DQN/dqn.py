@@ -30,6 +30,7 @@ class Model(nn.Module):
 class DQN():
     def __init__(self,actShape,obsShape,gamma,epsilon,training=True):
         self.model = Model(obsShape,actShape).to('cuda')
+        self.loss_fn = nn.MSELoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(),lr=5e-2)
         self.gamma = gamma
         self.epsilon = epsilon
@@ -47,16 +48,19 @@ class DQN():
         return predict
 
     def update_parameter(self, act, obs, reward, next_obs, done):
-        if done == True:
-            y = reward
-        else:
-            y = reward + self.gamma * torch.max(self.model(next_obs))
+        with torch.autocast(device_type='cuda', dtype=torch.float32):
+            if done == True:
+              y = reward
+            else:
+              y = reward + self.gamma * torch.max(self.model(next_obs))
 
-        x = self.model(obs)[int(act.item())]
-        loss = torch.pow(y-x,2)
+            x = torch.unsqueeze(self.model(obs)[int(act.item())],0)
+            loss = self.loss_fn(x,y)
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+
+        return loss
 
 

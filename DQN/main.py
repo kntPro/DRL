@@ -12,7 +12,7 @@ from config import *
 def main():
     env = gym.make('CartPole-v1')
     state,_ = env.reset()
-    memory = Memory(NUM_STEP,1,env.observation_space.shape[0])    
+    memory = DequeMemory(MEMORY)    
     agent = DQN(2,env.observation_space.shape[0],GAMMA,EPSILON)
     rewardEpi = np.zeros(NUM_EPI)
     lossEpi =  np.zeros(NUM_EPI)
@@ -20,8 +20,8 @@ def main():
     #train
     
     for i in tqdm(range(NUM_EPI)):
-        for _ in range(NUM_STEP):
-            action = agent.sample_action(torch.tensor(state))
+        for step in range(NUM_STEP):
+            action = agent.sample_action(torch.tensor(state), step)
             next_state, reward, terminate,truncate,_ = env.step(action)
             done = (terminate or truncate)
             rewardEpi[i] += reward
@@ -34,7 +34,6 @@ def main():
                 break
         
         state, _= env.reset()
-        memory.reset()
         done = False
 
         if(((i % INTERVAL) == 0) and (i != 0)):

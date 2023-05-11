@@ -109,14 +109,14 @@ class DequeMemory():
         rew = torch.as_tensor(reward, device=DEVICE)
         nob = torch.as_tensor(next_obs, device=DEVICE)
         
-        return (act,ob,rew,nob,done)
+        return act,ob,rew,nob,done
     
     def add(self, action, obs, reward, next_obs, done):
         seq = self.make_sequence(action, obs, reward, next_obs, done)
         self.memory.append(seq)
 
-    def randSample(self):
-        return random.sample(self.memory, 1)
+    def randomSample(self):
+        return random.choice(self.memory)
 
 
 '''
@@ -124,5 +124,6 @@ mem = DequeMemory(10)
 for i in range(12):
     mem.add(i,(i,i),(i,i,i),(i,i,i,i),(i%3==0))
 
-print(mem.memory)
+print(mem.randomSample())
+print(mem.memory.popleft())
 '''

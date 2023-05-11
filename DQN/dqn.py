@@ -4,6 +4,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision.transforms import ToTensor
+from config import *
 
 class Model(nn.Module):
     def __init__(self, obsShape, actShape):   #obsShape:受け取る状態の次元, actShape:受け取る行動の次元
@@ -14,7 +15,7 @@ class Model(nn.Module):
         self.secondAct = nn.ReLU()
         self.third = nn.Linear(32,actShape)
 
-    @torch.autocast(device_type='cuda')
+    @torch.autocast(device_type=DEVICE)
     def forward(self,x):
         #x1 = torch.tensor(x,dtype=torch.float32,requires_grad=True).clone().detach().requires_grad_(True).cuda()
         x1 = x.clone().detach().requires_grad_(True).cuda()
@@ -29,15 +30,15 @@ class Model(nn.Module):
 
 class DQN():
     def __init__(self,actShape,obsShape,gamma,epsilon,training=True):
-        self.model = Model(obsShape,actShape).to('cuda')
+        self.model = Model(obsShape,actShape).to(DEVICE)
         self.loss_fn = nn.MSELoss()
-        self.optimizer = torch.optim.SGD(self.model.parameters(),lr=5e-2)
+        self.optimizer = torch.optim.SGD(self.model.parameters(),lr=1e-3)
         self.gamma = gamma
-        self.epsilon = epsilon
+        self.epsilon = lambda step: max(1e6-step/1e6, epsilon) 
         self.traing = training
 
-    def sample_action(self,x):
-        if (self.epsilon < np.random.rand()) and self.traing:
+    def sample_action(self,x, step):
+        if (self.epsilon(step) < np.random.rand()) and self.traing:
             logits = self.model(x)
             probab = nn.Softmax(dim=0)(logits)
             tensorPredict = torch.argmax(probab).detach()

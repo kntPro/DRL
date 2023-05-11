@@ -1,5 +1,9 @@
 import numpy as np
 import torch
+import random
+from collections import deque
+from config import *
+
 
 class Memory():
     def __init__(self, size, actShape, obsShape) :
@@ -92,3 +96,33 @@ class NumMemory:
         np.zeros_like(self.next_obs) 
         np.zeros_like(self.done) 
         self.index  = 0
+
+
+
+class DequeMemory():
+    def __init__(self, size) :
+        self.memory = deque(maxlen=size)
+
+    def make_sequence(self, action, obs, reward, next_obs, done):
+        act = torch.as_tensor(action, device=DEVICE)
+        ob = torch.as_tensor(obs, device=DEVICE)
+        rew = torch.as_tensor(reward, device=DEVICE)
+        nob = torch.as_tensor(next_obs, device=DEVICE)
+        
+        return (act,ob,rew,nob,done)
+    
+    def add(self, action, obs, reward, next_obs, done):
+        seq = self.make_sequence(action, obs, reward, next_obs, done)
+        self.memory.append(seq)
+
+    def randSample(self):
+        return random.sample(self.memory, 1)
+
+
+'''
+mem = DequeMemory(10)
+for i in range(12):
+    mem.add(i,(i,i),(i,i,i),(i,i,i,i),(i%3==0))
+
+print(mem.memory)
+'''

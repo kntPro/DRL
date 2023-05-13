@@ -49,13 +49,13 @@ class DQN():
         return predict
 
     def update_parameter(self, act, obs, reward, next_obs, done):
-        with torch.autocast(device_type='cuda', dtype=torch.float32):
+        with torch.autocast(device_type=DEVICE, dtype=torch.float32):
             if done == True:
               y = reward
             else:
               y = reward + self.gamma * torch.max(self.model(next_obs))
 
-            x = torch.unsqueeze(self.model(obs)[int(act.item())],0)
+            x = self.model(obs)[int(act.item())]
             loss = self.loss_fn(x,y)
 
         self.optimizer.zero_grad()

@@ -84,7 +84,7 @@ print(f"probab1: {pred_probab1}")
 print(f"logits2: {logits2}")
 print(f"probab2: {pred_probab2}")
 '''
-
+'''
 agent = DQN(2,4,GAMMA,EPSILON)
 X = torch.rand(1,4,dtype=torch.float32)
 print(X)
@@ -96,7 +96,9 @@ print(f'act:{act}')
 print(f'type:{type(act)}')
 print(f'a-predict:{a-predict}')
 print(f'a-act:{a-act}')
-
 print(agent.model(np.arange(4)))
+'''
 
+a = [1.,23.,45.,5.,-7.,-0.,0.,-0.5]
 
+print(np.clip(a, 0., 1.))

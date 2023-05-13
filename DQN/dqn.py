@@ -49,11 +49,12 @@ class DQN():
         return predict
 
     def update_parameter(self, act, obs, reward, next_obs, done):
+        clipped_reward = torch.clamp(reward, min=-1.0, max=1.0)
         with torch.autocast(device_type=DEVICE, dtype=torch.float32):
             if done == True:
-              y = reward
+              y = clipped_reward
             else:
-              y = reward + self.gamma * torch.max(self.model(next_obs))
+              y = clipped_reward + self.gamma * torch.max(self.model(next_obs))
 
             x = self.model(obs)[int(act.item())]
             loss = self.loss_fn(x,y)

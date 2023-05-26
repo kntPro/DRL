@@ -4,6 +4,7 @@ import gym
 from memory import *
 from dqn import *
 from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
 from matplotlib import pyplot as plt
 import os
 from config import *
@@ -17,6 +18,7 @@ def main():
     rewardEpi = np.zeros(NUM_EPI)
     lossEpi =  np.zeros(NUM_EPI)
     done = False
+    writer = SummaryWriter() 
     #train
     
     for i in tqdm(range(NUM_EPI)):
@@ -37,8 +39,23 @@ def main():
         done = False
 
         if(((i % INTERVAL) == 0) and (i != 0)):
-            print(f'\n {i}:reward max:{max(rewardEpi[i-INTERVAL:i])}, mean:{np.mean(rewardEpi[i-INTERVAL:i])}, min:{min(rewardEpi[i-INTERVAL:i])}')
-            print(f' {i}:loss max:{max(lossEpi[i-INTERVAL:i])}, mean:{np.mean(lossEpi[i-INTERVAL:i])}, min:{min(lossEpi[i-INTERVAL:i])}\n')
+            intrvlMax = max(rewardEpi[i-INTERVAL:]) 
+            intrvlMin = min(rewardEpi[i-INTERVAL:])
+            intrvlMean = np.mean(rewardEpi[i-INTERVAL:])
+            lossMax = max(lossEpi[i-INTERVAL:])
+            lossMean = np.mean(lossEpi[i-INTERVAL:])
+            lossMin = min(lossEpi[i-INTERVAL:])
+
+            print(f'\n {i}:reward max:{intrvlMax}, mean:{intrvlMean}, min:{intrvlMin}')
+            print(f' {i}:loss max:{lossMax}, mean:{lossMean}, min:{lossMin}\n')
+
+            writer.add_scalar("RewardAve",intrvlMax,i)
+            writer.add_scalar("RerardMax",intrvlMax,i)
+            writer.add_scalar("RewardMin",intrvlMin,i)
+            writer.add_scalar("LossMaX",lossMax,i)
+            writer.add_scalar("LossMean",lossMean,i)
+            writer.add_scalar("LossMin",lossMin,i)
+        
     env.close()
 
     torch.save(agent.model,DQN_PARAM_PATH+str(NUM_EPI))

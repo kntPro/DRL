@@ -39,17 +39,17 @@ def main():
         done = False
 
         if(((i % INTERVAL) == 0) and (i != 0)):
-            intrvlMax = max(rewardEpi[i-INTERVAL:]) 
-            intrvlMin = min(rewardEpi[i-INTERVAL:])
-            intrvlMean = np.mean(rewardEpi[i-INTERVAL:])
-            lossMax = max(lossEpi[i-INTERVAL:])
-            lossMean = np.mean(lossEpi[i-INTERVAL:])
-            lossMin = min(lossEpi[i-INTERVAL:])
+            intrvlMax = max(rewardEpi[i-INTERVAL:i]) 
+            intrvlMin = min(rewardEpi[i-INTERVAL:i])
+            intrvlMean = np.mean(rewardEpi[i-INTERVAL:i])
+            lossMax = max(lossEpi[i-INTERVAL:i])
+            lossMean = np.mean(lossEpi[i-INTERVAL:i])
+            lossMin = min(lossEpi[i-INTERVAL:i])
 
             print(f'\n {i}:reward max:{intrvlMax}, mean:{intrvlMean}, min:{intrvlMin}')
             print(f' {i}:loss max:{lossMax}, mean:{lossMean}, min:{lossMin}\n')
 
-            writer.add_scalar("RewardAve",intrvlMax,i)
+            writer.add_scalar("RewardAve",intrvlMean,i)
             writer.add_scalar("RerardMax",intrvlMax,i)
             writer.add_scalar("RewardMin",intrvlMin,i)
             writer.add_scalar("LossMaX",lossMax,i)

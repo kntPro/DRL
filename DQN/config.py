@@ -9,6 +9,7 @@ NUM_EPI = int(1e6)
 NUM_STEP = int(1e2)
 MEMORY = int(1e5)
 INTERVAL = 100
+FALL_REWARD = -100 #棒が倒れたときの負の報酬
 DEVICE = (
              "cuda"
             if torch.cuda.is_available()

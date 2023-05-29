@@ -18,17 +18,20 @@ class CartPoleFallReward(Wrapper): #棒が倒れたら負の報酬を与えるCa
         
         return obs, reward, ter, trun, _
 
+def main():
+    e = gym.make("CartPole-v1")
+    env = CartPoleFallReward(e,FALL_REWARD)
+    obs,info = env.reset()
+    for i in range(100):
+        o,r,ter,trun, _= env.step(random.randint(0,1))
+        print(f"{i}回目")
+        print(f"termination:{ter}")
+        print(f"truncation:{trun}")
+        print(f"reward:{r}\n")
 
-e = gym.make("CartPole-v1")
-env = CartPoleFallReward(e,FALL_REWARD)
-obs,info = env.reset()
-for i in range(100):
-    o,r,ter,trun, _= env.step(random.randint(0,1))
-    print(f"{i}回目")
-    print(f"termination:{ter}")
-    print(f"truncation:{trun}")
-    print(f"reward:{r}\n")
+        if(ter or trun):
+            break
+    env.close()
 
-    if(ter or trun):
-        break
-env.close()
+if __name__ == '__main__':
+    main()

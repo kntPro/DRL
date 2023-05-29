@@ -34,17 +34,20 @@ class DQN():
         self.loss_fn = nn.MSELoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(),lr=1e-3)
         self.gamma = gamma
-        self.epsilon = lambda step: max(1e6-step/1e6, epsilon) 
+        self.step = 0
+        self.epsilon = lambda :max((EPSILON_COE-self.step)/EPSILON_COE, epsilon) #epsilon-annealing
         self.traing = training
 
-    def sample_action(self,x, step):
-        if (self.epsilon(step) < np.random.rand()) and self.traing:
+    def sample_action(self,x):
+        if (self.epsilon() < np.random.rand()) and self.traing:
             logits = self.model(x)
             probab = nn.Softmax(dim=0)(logits)
             tensorPredict = torch.argmax(probab).detach()
             predict = tensorPredict.cpu().numpy()
         else:
             predict = np.random.randint(0,2)
+
+        self.step+=1
 
         return predict
 

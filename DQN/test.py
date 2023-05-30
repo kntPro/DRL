@@ -1,6 +1,9 @@
 import numpy as np
+from tqdm import tqdm
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as Opt
 from dqn import *
 from config import *
 '''a = [[1.,2.,3.,4.],[5.,6.,7.,8.]]
@@ -98,7 +101,44 @@ print(f'a-predict:{a-predict}')
 print(f'a-act:{a-act}')
 print(agent.model(np.arange(4)))
 '''
+'''
+agent = DQN(2,4,GAMMA,EPSILON)
+opt = Opt.SGD(agent.model.parameters(), lr=1e-3)
+tensor = torch.tensor([1.,2.,3.,4.])
+print(agent.model(tensor)[0])
+print(agent.model(tensor)[1])
+loss = (agent.model(tensor)[0] - agent.model(tensor)[1]).pow(2)
+lossF = F.mse_loss(input=agent.model(tensor)[1], target=agent.model(tensor)[0])
+#print(loss)
+#print(lossF)
+loss.backward()
+opt.step()
+opt.zero_grad()
+print(agent.model(tensor)[0])
+print(agent.model(tensor)[1])
+'''
 
-a = [1.,23.,45.,5.,-7.,-0.,0.,-0.5]
 
-print(np.clip(a, 0., 1.))
+agent = DQN(2,4,GAMMA,EPSILON)            #損失関数を二乗にした場合、２つのprint間で変化はなく、学習していないことがわかる
+opt = Opt.SGD(agent.model.parameters(), lr=1e-3)
+preTensor = torch.randn(4)
+print(agent.model(preTensor)[0] - agent.model(preTensor)[1])
+name = 0
+if(name == 0):
+    loss_fn = lambda x, y: (x-y).pow(2)
+else:
+    loss_fn = nn.MSELoss()
+
+agent.model.train()
+for i in tqdm(range(int(1e5))):
+    tensor = torch.tensor(np.random.rand(4),dtype=torch.float32)
+    loss = loss_fn(agent.model(tensor)[0], agent.model(tensor)[1])
+    loss.backward()
+    opt.step()
+    opt.zero_grad()
+
+agent.model.eval()
+print(agent.model(preTensor)[0] - agent.model(preTensor)[1])
+
+
+

@@ -61,10 +61,10 @@ class DQN():
 
             x = self.model(obs)[int(act.item())]
             loss = self.loss_fn(x,y)
-
-        self.optimizer.zero_grad()
+        
         loss.backward()
         self.optimizer.step()
+        self.optimizer.zero_grad()
 
         return loss
 

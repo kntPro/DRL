@@ -1,6 +1,6 @@
 import numpy as np
 import torch
-import gym
+import gymnasium as gym
 from memory import *
 from dqn import *
 from tqdm import tqdm

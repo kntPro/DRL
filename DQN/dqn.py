@@ -9,16 +9,16 @@ from config import *
 class Model(nn.Module):
     def __init__(self, obsShape, actShape):   #obsShape:受け取る状態の次元, actShape:受け取る行動の次元
         super().__init__()
-        self.first = nn.Linear(obsShape,32)
+        self.first = nn.Linear(obsShape,32, dtype=torch.float32)
         self.firstAct = nn.ReLU() 
-        self.second = nn.Linear(32,32)
+        self.second = nn.Linear(32,32, dtype=torch.float32)
         self.secondAct = nn.ReLU()
-        self.third = nn.Linear(32,actShape)
+        self.third = nn.Linear(32,actShape, dtype=torch.float32)
 
     @torch.autocast(device_type=DEVICE)
     def forward(self,x):
         #x1 = torch.tensor(x,dtype=torch.float32,requires_grad=True).clone().detach().requires_grad_(True).cuda()
-        x1 = x.clone().detach().requires_grad_(True).cuda()
+        x1 = x.clone().detach().float().requires_grad_(True).cuda()
         x2 = self.first(x1)
         x3 = self.firstAct(x2)
         x4 = self.second(x3)
@@ -31,8 +31,8 @@ class Model(nn.Module):
 class DQN():
     def __init__(self,actShape,obsShape,gamma,epsilon,test=False):
         self.model = Model(obsShape,actShape).to(DEVICE)
-        #self.loss_fn = nn.MSELoss()
-        self.loss_fn = lambda pred,targ:torch.pow((targ-pred),2)
+        self.loss_fn = nn.MSELoss()
+        #self.loss_fn = lambda pred,targ:torch.pow((targ-pred),2)
         self.optimizer = torch.optim.SGD(self.model.parameters(),lr=1e-3)
         self.gamma = gamma
         self.step = 0
@@ -56,14 +56,14 @@ class DQN():
     def update_parameter(self, act, obs, rew, next_obs, done):
         #reward = torch.clamp(rew, min=-1.0, max=1.0)
         reward = rew.detach().clone().float().cuda()
-        with torch.autocast(device_type=DEVICE, dtype=torch.float32):
-            if done == True:
-              y = reward
-            else:
-              y = reward + (self.gamma * torch.max(self.model(next_obs)).detach().clone().float().cuda())
-
-            x = self.model(obs)[int(act.item())]
-            loss = -(self.loss_fn(x,y))
+        #with torch.autocast(device_type=DEVICE, dtype=torch.float32):
+        if done == True:
+            y = reward
+        else:
+            y = reward + (self.gamma * torch.max(self.model(next_obs)).detach().clone().float().cuda())
+            
+        x = self.model(obs)[int(act.item())].float()
+        loss = self.loss_fn(x,y)
         
         loss.backward()
         self.optimizer.step()
@@ -72,3 +72,19 @@ class DQN():
         return loss
 
 
+def main():
+    agent = DQN(2,4,GAMMA,EPSILON)
+    rew = torch.tensor([3.], requires_grad=True)
+    r = rew.detach().clone().float().cuda()
+    y = r + (0.99 * torch.max(agent.model(torch.rand(4))).detach().clone().float().cuda())
+
+    print(r)
+    print(y)
+    print(y.requires_grad)
+    x = agent.model(torch.rand(4))[1]
+    print(x)
+    print(x.requires_grad)
+    w = x.float()
+
+if __name__ == '__main__':
+    main()

@@ -1,5 +1,5 @@
 import gymnasium as gym
-from gym import Wrapper
+from gymnasium import Wrapper
 from config import *
 import random
 

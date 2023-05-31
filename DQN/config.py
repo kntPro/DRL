@@ -3,10 +3,10 @@ import torch
 
 #モデルのパラメーターの保存先
 DQN_PARAM_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'param/DQNparam')
-GAMMA = 0.9
+GAMMA = 0.99
 EPSILON = 0.01  #最小値
 EPSILON_COE = int(5e5) #  アニーリングを終了するステップ数
-NUM_EPI = int(1e6)
+NUM_EPI = int(1e5)
 NUM_STEP = int(1e2)
 MEMORY = int(1e5)
 INTERVAL = 100

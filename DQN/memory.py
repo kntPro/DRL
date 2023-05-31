@@ -119,11 +119,14 @@ class DequeMemory():
         return random.choice(self.memory)
 
 
-'''
-mem = DequeMemory(10)
-for i in range(12):
-    mem.add(i,(i,i),(i,i,i),(i,i,i,i),(i%3==0))
 
-print(mem.randomSample())
-print(mem.memory.popleft())
-'''
+def main():
+    mem = DequeMemory(10)
+    for i in range(12):
+        mem.add(i,(i,i),(i,i,i),(i,i,i,i),(i%3==0))
+
+    print(mem.randomSample())
+    print(mem.memory.popleft())
+
+if __name__ == '__main__':
+    main()

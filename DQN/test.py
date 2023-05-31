@@ -119,6 +119,7 @@ print(agent.model(tensor)[1])
 '''
 
 
+'''
 agent = DQN(2,4,GAMMA,EPSILON)            #損失関数を二乗にした場合、２つのprint間で変化はなく、学習していないことがわかる
 opt = Opt.SGD(agent.model.parameters(), lr=1e-3)
 preTensor = torch.randn(4)
@@ -139,6 +140,53 @@ for i in tqdm(range(int(1e5))):
 
 agent.model.eval()
 print(agent.model(preTensor)[0] - agent.model(preTensor)[1])
+'''
 
+'''
+loss_fn = F.mse_loss
+agent = DQN(2,4,GAMMA,EPSILON)
+Amax = torch.max(agent.model(torch.rand(1,4)))
+print(f"Amax:{Amax}")
+print(f"Amax.requires_grad:{Amax.requires_grad}")   #!!! これはTrueとなる!!!
+y = 1.0 + 0.3 * Amax
+print(f"y.requires_grad:{y.requires_grad}")
+b = Amax.detach().clone()
+print(f"b.requires_grad:{b.requires_grad}")
+z = 1.0 + 0.3 * b
+print(f"z.requires_grad:{z.requires_grad}")
+print(f"agent.model(torch.rand(1,4))[0,0]:{agent.model(torch.rand(1,4))[0,0]}")
+print(f"z:{z}")
+w = loss_fn(agent.model(torch.rand(1,4))[0,0], z)
+print(f"w.requires_grad:{w.requires_grad}")
+#Amax:0.035308837890625
+#Amax.requires_grad:True
+#y.requires_grad:True
+#b.requires_grad:False
+#z.requires_grad:False
+#agent.model(torch.rand(1,4))[0,0]:0.0145416259765625
+#z:1.0107421875
+#w.requires_grad:True
 
+'''
+
+mse = lambda pred,targ:torch.pow((targ-pred),2)
+a = torch.tensor((1.,2.,3.,4.),requires_grad=True)
+b = torch.tensor((1.,4.,6.,8.),requires_grad=True)
+m = mse(a,b).sum()              #(b-a)**2
+print(f"m:{m}")
+print(f"m.requires_grad:{m.requires_grad}")
+m.backward()
+print(a.grad)     #-2(b-a)    >>tensor([-0., -4., -6., -8.])
+print(b.grad)     #2(b-a)*(b)     >>tensor([0., 4., 6., 8.])
+
+c = torch.tensor((1.,2.,3.,4.),requires_grad=True)
+d = torch.tensor((1.,4.,6.,8.),requires_grad=True)
+
+nmse = nn.MSELoss(reduction='sum')
+nm = nmse(c,d)
+print(f"nm:{nm}")
+print(f"nm.requires_grad.{nm.requires_grad}")
+nm.backward()
+print(f"c.grad:{c.grad}")
+print(f"d.grad:{d.grad}")
 

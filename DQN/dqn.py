@@ -29,21 +29,23 @@ class Model(nn.Module):
     
 
 class DQN():
-    def __init__(self,actShape,obsShape,gamma,epsilon,training=True):
+    def __init__(self,actShape,obsShape,gamma,epsilon,test=False):
         self.model = Model(obsShape,actShape).to(DEVICE)
-        self.loss_fn = nn.MSELoss()
+        #self.loss_fn = nn.MSELoss()
+        self.loss_fn = lambda pred,targ:torch.pow((targ-pred),2)
         self.optimizer = torch.optim.SGD(self.model.parameters(),lr=1e-3)
         self.gamma = gamma
         self.step = 0
         self.epsilon = lambda :max((EPSILON_COE-self.step)/EPSILON_COE, epsilon) #epsilon-annealing
-        self.traing = training
+        self.test = test
 
     def sample_action(self,x):
-        if (self.epsilon() < np.random.rand()) and self.traing:
-            logits = self.model(x)
-            probab = nn.Softmax(dim=0)(logits)
-            tensorPredict = torch.argmax(probab).detach()
-            predict = tensorPredict.cpu().numpy()
+        if (self.epsilon() < np.random.rand()) or self.test:
+            with torch.no_grad():
+                logits = self.model(x)
+                probab = nn.Softmax(dim=0)(logits)
+                tensorPredict = torch.argmax(probab).detach()
+                predict = tensorPredict.cpu().numpy()
         else:
             predict = np.random.randint(0,2)
 
@@ -51,16 +53,17 @@ class DQN():
 
         return predict
 
-    def update_parameter(self, act, obs, reward, next_obs, done):
-        clipped_reward = torch.clamp(reward, min=-1.0, max=1.0)
+    def update_parameter(self, act, obs, rew, next_obs, done):
+        #reward = torch.clamp(rew, min=-1.0, max=1.0)
+        reward = rew.detach().clone().float().cuda()
         with torch.autocast(device_type=DEVICE, dtype=torch.float32):
             if done == True:
-              y = clipped_reward
+              y = reward
             else:
-              y = clipped_reward + self.gamma * torch.max(self.model(next_obs))
+              y = reward + (self.gamma * torch.max(self.model(next_obs)).detach().clone().float().cuda())
 
             x = self.model(obs)[int(act.item())]
-            loss = self.loss_fn(x,y)
+            loss = -(self.loss_fn(x,y))
         
         loss.backward()
         self.optimizer.step()

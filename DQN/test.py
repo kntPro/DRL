@@ -1,4 +1,5 @@
 import numpy as np
+import gymnasium as gym
 from tqdm import tqdm
 import torch
 import torch.nn as nn
@@ -168,7 +169,7 @@ print(f"w.requires_grad:{w.requires_grad}")
 #w.requires_grad:True
 
 '''
-
+'''
 mse = lambda pred,targ:torch.pow((targ-pred),2)
 a = torch.tensor((1.,2.,3.,4.),requires_grad=True)
 b = torch.tensor((1.,4.,6.,8.),requires_grad=True)
@@ -189,4 +190,32 @@ print(f"nm.requires_grad.{nm.requires_grad}")
 nm.backward()
 print(f"c.grad:{c.grad}")
 print(f"d.grad:{d.grad}")
+'''
 
+'''
+a = np.array([1.,2.,3.,4.])
+b = torch.as_tensor(a)    #as_tensor値を共有する！！
+c = torch.tensor(a)       #tensrは新しくメモリを割り当てる
+print(a)
+print(b)
+print(c)
+c[2] = 0.
+print(a)
+print(b)
+print(c)
+b[2] = 0.
+print(a)
+print(b)
+print(c)
+'''
+'''
+relu = nn.ReLU()
+print(relu(torch.rand(4)))
+print(F.relu(torch.rand(4)))
+'''
+
+model = torch.load('/home/yamamoto/DRL/DQN/param/DQNparam30000')
+env = gym.make('CartPole-v1')
+obs ,_ = env.reset()
+print(obs)
+print(model(torch.tensor(obs)))

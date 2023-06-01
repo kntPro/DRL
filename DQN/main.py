@@ -4,7 +4,7 @@ import gymnasium as gym
 from memory import *
 from dqn import *
 from tqdm import tqdm
-from env import CartPoleFallReward
+from env import CartPoleFallReward, ClipedObsCart
 from torch.utils.tensorboard import SummaryWriter
 from matplotlib import pyplot as plt
 import os
@@ -12,7 +12,8 @@ from config import *
 
 
 def main():
-    env = CartPoleFallReward(gym.make('CartPole-v1'), fall=FALL_REWARD)
+    #env = CartPoleFallReward(gym.make('CartPole-v1'), fall=FALL_REWARD)
+    env = ClipedObsCart(gym.make('CartPole-v1'), fall=FALL_REWARD)
     state,_ = env.reset()
     memory = DequeMemory(MEMORY)    
     agent = DQN(2,env.observation_space.shape[0],GAMMA,EPSILON)
@@ -29,9 +30,10 @@ def main():
             done = (terminate or truncate)
             rewardEpi[i] += reward
             memory.add(action,state,reward,next_state,done)
+            state = next_state
             act, stat, rew, next_stat, do = memory.randomSample()
             lossEpi[i] += agent.update_parameter(act,stat,rew,next_stat,do)
-
+            
             if(done):
                 break
         

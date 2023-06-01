@@ -104,10 +104,10 @@ class DequeMemory():
         self.memory = deque(maxlen=size)
 
     def make_sequence(self, action, obs, reward, next_obs, done):
-        act = torch.as_tensor(action, device=DEVICE)
-        ob = torch.as_tensor(obs, device=DEVICE)
-        rew = torch.as_tensor(reward, device=DEVICE)
-        nob = torch.as_tensor(next_obs, device=DEVICE)
+        act = torch.tensor(action, device=DEVICE, dtype=torch.float32)
+        ob = torch.tensor(obs, device=DEVICE, dtype=torch.float32)
+        rew = torch.tensor(reward, device=DEVICE, dtype=torch.float32)
+        nob = torch.tensor(next_obs, device=DEVICE, dtype=torch.float32)
         
         return act,ob,rew,nob,done
     

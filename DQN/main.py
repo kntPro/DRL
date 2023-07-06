@@ -33,8 +33,16 @@ def main():
             rewardEpi[i] += reward
             memory.add(action,state,reward,next_state,done)
             state = next_state
-            act, stat, rew, n_stat, do = memory.randomSample()
-            lossEpi[i] += agent.update_parameter(act,stat,rew,n_stat,do)
+
+            transitions = memory.randomSample(BATCH_SIZE)
+            batch = Transition(*zip(*transitions))
+            batch_action = torch.tensor(batch.action,device=DEVICE, dtype=torch.float32)
+            batch_state = torch.tensor(batch.state,device=DEVICE, dtype=torch.float32)
+            batch_reward = torch.tensor(batch.reward,device=DEVICE, dtype=torch.float32)
+            batch_nextState = torch.tensor(batch.next_state,device=DEVICE, dtype=torch.float32)
+            batch_done = torch.tensor(batch.done,device=DEVICE, dtype=torch.float32)
+
+            lossEpi[i] += agent.update_parameter(batch_action,batch_state,batch_reward,batch_nextState,batch_done)
             
             if(done):
                 break

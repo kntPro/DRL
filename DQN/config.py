@@ -1,6 +1,10 @@
 import os
 import torch
+from collections import namedtuple
 
+
+
+Transition = namedtuple('Transition',("action","state","reward","next_state","done"))
 #モデルのパラメーターの保存先
 DQN_PARAM_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'param/DQNparam')
 GAMMA = 0.99

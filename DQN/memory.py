@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import random
-from collections import deque
+from collections import deque, namedtuple
 from config import *
 
 
@@ -98,36 +98,48 @@ class NumMemory:
         self.index  = 0
 
 
-
 class DequeMemory():
     def __init__(self, size) :
         self.memory = deque(maxlen=size)
 
+    '''
     def make_sequence(self, action, obs, reward, next_obs, done):
-        act = torch.tensor(action, device=DEVICE, dtype=torch.float32).view(1,-1)
-        ob = torch.tensor(obs, device=DEVICE, dtype=torch.float32).view(1,-1)
-        rew = torch.tensor(reward, device=DEVICE, dtype=torch.float32).view(1,-1)
-        nob = torch.tensor(next_obs, device=DEVICE, dtype=torch.float32).view(1,-1)
+        act = torch.tensor(action, device=DEVICE, dtype=torch.float32)
+        #state = torch.tensor(obs, device=DEVICE, dtype=torch.float32)
+        state = obs
+        rew = torch.tensor(reward, device=DEVICE, dtype=torch.float32)
+        next_state = torch.tensor(next_obs, device=DEVICE, dtype=torch.float32)
         
-        return act,ob,rew,nob,done
+        return act,state,rew,next_state,done
+        '''
     
     def add(self, action, obs, reward, next_obs, done):
-        seq = self.make_sequence(action, obs, reward, next_obs, done)
-        self.memory.append(seq)
+        self.memory.append(Transition(action, obs, reward, next_obs, done))
 
-    def randomSample(self):
-        return random.sample(self.memory)
+    def randomSample(self,size):
+        capacity = min(size,len(self.memory))
+        return random.sample(self.memory,capacity)
 
 
 
 def main():
     mem = DequeMemory(10)
     for i in range(12):
-        mem.add(i,(i,i),i,(i,i),(i%3==0))
+        mem.add(i,np.array([i,i*10]),i*100,i*1000,(i%3==0))
     
-   
-    print(mem.randomSample())
-    print(mem.memory.popleft())
+    #for i in mem.randomSample(5): 
+    #    print(i)
+    batch = Transition(*zip(*mem.randomSample(100)))    
+    #一度mem.randomSample(100)でTransitionを要素に持つタプルを取得、
+    #＊でアンパックし、zipで名前ごとにタプルを作成
+    # ※このとき作られるのは、action,state,reward,next_state,doneがそれぞれタプルでまとめられ、
+    #それを要素に持つタプル！
+    #最後にzipで作成されたタプルをアンパックした複数のタプルをそれぞれTransitionに入れる
+    batch_state = torch.tensor(batch.state)
+    batch_act = torch.tensor(batch.action)
+    print(batch_state)
+    print(batch_act)
+    print(batch.done)
 
 if __name__ == '__main__':
     main()

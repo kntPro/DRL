@@ -239,8 +239,28 @@ print(f"batch:{batch}")
 print(f"batch.b:{batch.b}")
 print(f"torch.cat(batch.b):{torch.cat(batch.b)}")
 '''
-
+'''
 a = torch.tensor(4).view(1,-1)
 b = torch.tensor([2.,3.,4.,5.]).view(1,-1).dim()
 print(a)
 print(b)
+'''
+agent = DQN(2,4,GAMMA,EPSILON)
+state = torch.tensor(np.random.rand(10,4))
+qList = agent.model(state)
+rList = [100 for i in range(10)]
+nList = torch.tensor([15 for i in range(15)])
+dList = (i%3 == 0 for i in range(10))
+actList = torch.tensor(np.random.randint(0,2,(10,1)),device=DEVICE)
+print(actList)
+print(qList)
+choiceActList = torch.gather(qList,1,actList)
+print(choiceActList)
+
+y = torch.tensor(tuple(map(lambda r,n,d:
+                    r + n
+                    if not d
+                    else 
+                    r
+                ,rList,nList,dList)), device=DEVICE)
+print(y)

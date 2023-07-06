@@ -54,16 +54,16 @@ class DQN():
         self.step+=1
 
         return predict
-
-    def update_parameter(self, act, obs, reward, next_obs, done):
+    '''
+    def update_parameter(self, act, state, reward, next_state, done):
         #reward = torch.clamp(rew, min=-1.0, max=1.0)
         with torch.autocast(device_type=DEVICE, dtype=torch.float32):
             if done == True:
                 y = reward
             else:
-                y = reward + (self.gamma * torch.max(self.model(next_obs)).detach().clone().cuda())
+                y = reward + (self.gamma * torch.max(self.model(next_state)).detach().clone().cuda())
 
-            x = self.model(obs)[int(act.item())]
+            x = self.model(state)[int(act.item())]
 
         loss = self.loss_fn(x,y)
         
@@ -71,8 +71,28 @@ class DQN():
         loss.backward()
         #nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.)
         self.optimizer.step()
-
+    
         return loss
+'''
+    def update_parameter(self, act, state, reward, next_state, done):
+        y = torch.tensor(map(lambda r,n,d:
+                    r + (self.gamma * torch.max(self.model(n)).detach().clone().cuda())
+                    if not d
+                    else 
+                    r
+                ,reward,next_state,done), device=DEVICE)
+        
+        qList = self.model(state)
+        x = torch.gather(qList,1,act)
+
+        loss = self.loss_fn(x,y)
+        self.optimizer.zero_grad()
+        loss.backward()
+        #nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.)
+        self.optimizer.step()
+    
+        return loss
+    
 
 
 def main():

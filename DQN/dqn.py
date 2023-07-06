@@ -75,12 +75,12 @@ class DQN():
         return loss
 '''
     def update_parameter(self, act, state, reward, next_state, done):
-        y = torch.tensor(map(lambda r,n,d:
+        y = torch.tensor(tuple(map(lambda r,n,d:
                     r + (self.gamma * torch.max(self.model(n)).detach().clone().cuda())
                     if not d
                     else 
                     r
-                ,reward,next_state,done), device=DEVICE)
+                ,reward,next_state,done)), device=DEVICE)
         
         qList = self.model(state)
         x = torch.gather(qList,1,act)

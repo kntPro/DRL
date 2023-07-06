@@ -116,9 +116,8 @@ class DequeMemory():
     def add(self, action, obs, reward, next_obs, done):
         self.memory.append(Transition(action, obs, reward, next_obs, done))
 
-    def randomSample(self,size):
-        capacity = min(size,len(self.memory))
-        return random.sample(self.memory,capacity)
+    def randomSample(self):
+        return random.sample(self.memory)
 
 
 

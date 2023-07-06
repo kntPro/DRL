@@ -83,7 +83,7 @@ class DQN():
                 ,reward,next_state,done)), device=DEVICE)
         
         qList = self.model(state)
-        x = torch.gather(qList,1,act)
+        x = torch.gather(qList,1,act.view(1,-1))
 
         loss = self.loss_fn(x,y)
         self.optimizer.zero_grad()

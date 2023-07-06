@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import torch
 import gymnasium as gym
@@ -31,18 +32,18 @@ def main():
             done = terminate or truncate
            # if(done): next_state = None
             rewardEpi[i] += reward
-            memory.add(action,state,reward,next_state,done)
-            state = next_state
+            memory.add(action,copy.deepcopy(state),reward,copy.deepcopy(next_state),done)
+            state = copy.deepcopy(next_state)
 
-            transitions = memory.randomSample(BATCH_SIZE)
-            batch = Transition(*zip(*transitions))
-            batch_action = torch.tensor(batch.action,device=DEVICE, dtype=torch.float32)
-            batch_state = torch.tensor(batch.state,device=DEVICE, dtype=torch.float32)
-            batch_reward = torch.tensor(batch.reward,device=DEVICE, dtype=torch.float32)
-            batch_nextState = torch.tensor(batch.next_state,device=DEVICE, dtype=torch.float32)
-            batch_done = torch.tensor(batch.done,device=DEVICE, dtype=torch.float32)
-
-            lossEpi[i] += agent.update_parameter(batch_action,batch_state,batch_reward,batch_nextState,batch_done)
+            if(len(memory.memory)>=BATCH_SIZE):
+                transitions = memory.randomSample(BATCH_SIZE)
+                batch = Transition(*zip(*transitions))
+                batch_action = torch.tensor(batch.action,device=DEVICE, dtype=torch.int64)
+                batch_state = torch.tensor(batch.state,device=DEVICE, dtype=torch.float32)
+                batch_reward = torch.tensor(batch.reward,device=DEVICE, dtype=torch.float32)
+                batch_nextState = torch.tensor(batch.next_state,device=DEVICE, dtype=torch.float32)
+                batch_done = batch.done
+                lossEpi[i] += agent.update_parameter(batch_action,batch_state,batch_reward,batch_nextState,batch_done)
             
             if(done):
                 break

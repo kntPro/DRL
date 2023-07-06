@@ -1,3 +1,6 @@
+from collections import namedtuple
+from collections import deque
+import random
 import numpy as np
 import gymnasium as gym
 from tqdm import tqdm
@@ -213,9 +216,31 @@ relu = nn.ReLU()
 print(relu(torch.rand(4)))
 print(F.relu(torch.rand(4)))
 '''
-
+'''
 model = torch.load('/home/yamamoto/DRL/DQN/param/DQNparam30000')
 env = gym.make('CartPole-v1')
 obs ,_ = env.reset()
 print(obs)
 print(model(torch.tensor(obs)))
+'''
+
+'''
+hoge = namedtuple("test","a,b,c,d")
+memory = deque([],maxlen=10)
+_t = lambda x: torch.tensor([x])
+memory.append(hoge(_t(1),_t(2),_t(3),_t(4)))
+memory.append(hoge(_t(2),_t(4),_t(6),_t(8)))
+memory.append(hoge(_t(3),_t(6),_t(9),_t(12)))
+print(f"memory:{memory}")
+fuga = random.sample(memory, 2)
+print(f"fuga:{fuga}")
+batch = hoge(*zip(*fuga))
+print(f"batch:{batch}")
+print(f"batch.b:{batch.b}")
+print(f"torch.cat(batch.b):{torch.cat(batch.b)}")
+'''
+
+a = torch.tensor(4).view(1,-1)
+b = torch.tensor([2.,3.,4.,5.]).view(1,-1).dim()
+print(a)
+print(b)

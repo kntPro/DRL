@@ -9,9 +9,9 @@ from config import *
 class Model(nn.Module):
     def __init__(self, obsShape, actShape):   #obsShape:受け取る状態の次元, actShape:受け取る行動の次元
         super().__init__()
-        self.first = nn.Linear(obsShape,32, dtype=torch.float32)
+        self.first = nn.Linear(obsShape,16, dtype=torch.float32)
         self.firstAct = nn.ReLU() 
-        self.second = nn.Linear(32,32, dtype=torch.float32)
+        self.second = nn.Linear(16,32, dtype=torch.float32)
         self.secondAct = nn.ReLU()
         self.third = nn.Linear(32,actShape, dtype=torch.float32)
 
@@ -31,8 +31,8 @@ class Model(nn.Module):
 class DQN():
     def __init__(self,actShape,obsShape,gamma,epsilon,test=False):
         self.model = Model(obsShape,actShape).to(DEVICE)
-        self.loss_fn = nn.SmoothL1Loss()
-        #self.loss_fn = nn.MSELoss()
+        #self.loss_fn = nn.SmoothL1Loss()
+        self.loss_fn = nn.MSELoss()
         #self.loss_fn = lambda pred,targ:torch.pow((targ-pred),2)
         #self.optimizer = torch.optim.SGD(self.model.parameters(),lr=1e-3)
         self.optimizer = torch.optim.Adam(self.model.parameters())
@@ -46,7 +46,7 @@ class DQN():
             with torch.no_grad():
                 logits = self.model(x)
                 probab = nn.Softmax(dim=0)(logits)
-                tensorPredict = torch.argmax(probab).detach()
+                tensorPredict = torch.argmax(probab)
                 predict = tensorPredict.cpu().numpy()
         else:
             predict = np.random.randint(0,2)
@@ -69,7 +69,7 @@ class DQN():
         
         self.optimizer.zero_grad()
         loss.backward()
-        nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.)
+        #nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.)
         self.optimizer.step()
 
         return loss

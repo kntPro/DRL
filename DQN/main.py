@@ -23,16 +23,18 @@ def main():
     writer = SummaryWriter() 
     #train
     
+    
     for i in tqdm(range(NUM_EPI)):
         for step in range(NUM_STEP):
             action = agent.sample_action(torch.tensor(state))
             next_state, reward, terminate,truncate,_ = env.step(action)
-            done = (terminate or truncate)
+            done = terminate or truncate
+           # if(done): next_state = None
             rewardEpi[i] += reward
             memory.add(action,state,reward,next_state,done)
             state = next_state
-            act, stat, rew, next_stat, do = memory.randomSample()
-            lossEpi[i] += agent.update_parameter(act,stat,rew,next_stat,do)
+            act, stat, rew, n_stat, do = memory.randomSample()
+            lossEpi[i] += agent.update_parameter(act,stat,rew,n_stat,do)
             
             if(done):
                 break

@@ -15,17 +15,16 @@ class Model(nn.Module):
         self.secondAct = nn.ReLU()
         self.third = nn.Linear(32,actShape, dtype=torch.float32)
 
-    @torch.autocast(device_type=DEVICE)
-    def forward(self,x):
+    def forward(self,state):
         #x1 = torch.tensor(x,dtype=torch.float32,requires_grad=True).clone().detach().requires_grad_(True).cuda()
-        t = x.clone().detach().float().cuda()
-        t = self.first(t)
+        #x = y
+        t = self.first(state)
         t = self.firstAct(t)
         t = self.second(t)
         t = self.secondAct(t)
         t = self.third(t)
 
-        return t.float() 
+        return t 
     
 
 class DQN():
@@ -45,11 +44,10 @@ class DQN():
         if (self.epsilon() < np.random.rand()) or self.test:
             with torch.no_grad():
                 logits = self.model(x)
-                probab = nn.Softmax(dim=0)(logits)
-                tensorPredict = torch.argmax(probab)
-                predict = tensorPredict.cpu().numpy()
+                #probab = nn.Softmax(dim=1)(logits)
+                predict = torch.argmax(logits).view(1,1)
         else:
-            predict = np.random.randint(0,2)
+            predict = torch.tensor([[np.random.randint(0,2)]],device=DEVICE,dtype=torch.int32)
 
         self.step+=1
 
@@ -80,10 +78,11 @@ class DQN():
                     if not d
                     else 
                     r
-                ,reward,next_state,done)), device=DEVICE)
+                ,reward,next_state,done)), device=DEVICE).view(-1,1)
         
         qList = self.model(state)
-        x = torch.gather(qList,1,act.view(1,-1))
+        actList = act.view(-1,1)
+        x = torch.gather(qList,1,actList)
 
         loss = self.loss_fn(x,y)
         self.optimizer.zero_grad()

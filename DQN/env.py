@@ -11,7 +11,7 @@ class CartPoleFallReward(Wrapper): #棒が倒れたら負の報酬を与えるCa
 
     def step(self, action,):
         obs, re, ter, trun, _ = self.env.step(action)
-        if ter:
+        if trun:
             reward = self.fReward
         else:
             reward = re

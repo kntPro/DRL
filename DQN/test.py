@@ -245,6 +245,8 @@ b = torch.tensor([2.,3.,4.,5.]).view(1,-1).dim()
 print(a)
 print(b)
 '''
+
+'''
 agent = DQN(2,4,GAMMA,EPSILON)
 state = torch.tensor(np.random.rand(10,4))
 qList = agent.model(state)
@@ -264,3 +266,6 @@ y = torch.tensor(tuple(map(lambda r,n,d:
                     r
                 ,rList,nList,dList)), device=DEVICE)
 print(y)
+'''
+qList = [[0,1] for _ in range(20)]
+act = [[random.randint(0,1)] ]

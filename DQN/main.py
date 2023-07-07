@@ -13,9 +13,10 @@ from config import *
 
 
 def main():
-    #env = CartPoleFallReward(gym.make('CartPole-v1'), fall=FALL_REWARD)
-    env = ClipedObsCart(gym.make('CartPole-v1'), fall=FALL_REWARD)
+    env = CartPoleFallReward(gym.make('CartPole-v1'), fall=FALL_REWARD)
+    #env = ClipedObsCart(gym.make('CartPole-v1'), fall=FALL_REWARD)
     state,_ = env.reset()
+    state = torch.tensor(state, dtype=torch.float32, device=DEVICE).unsqueeze(0)
     memory = DequeMemory(MEMORY)    
     agent = DQN(2,env.observation_space.shape[0],GAMMA,EPSILON)
     rewardEpi = np.zeros(NUM_EPI)
@@ -27,21 +28,25 @@ def main():
     
     for i in tqdm(range(NUM_EPI)):
         for step in range(NUM_STEP):
-            action = agent.sample_action(torch.tensor(state))
-            next_state, reward, terminate,truncate,_ = env.step(action)
+            action = agent.sample_action(state)
+            next_state, reward, terminate,truncate,_ = env.step(action.item())
             done = terminate or truncate
            # if(done): next_state = None
             rewardEpi[i] += reward
-            memory.add(action,copy.deepcopy(state),reward,copy.deepcopy(next_state),done)
-            state = copy.deepcopy(next_state)
+
+            next_state = torch.tensor(next_state,dtype=torch.float32,device=DEVICE).unsqueeze(0)
+            reward = torch.tensor(reward,dtype=torch.float32,device=DEVICE).unsqueeze(0)
+
+            memory.add(action,state,reward,next_state,done)
+            state = next_state
 
             if(len(memory.memory)>=BATCH_SIZE):
                 transitions = memory.randomSample(BATCH_SIZE)
                 batch = Transition(*zip(*transitions))
-                batch_action = torch.tensor(batch.action,device=DEVICE, dtype=torch.int64)
-                batch_state = torch.tensor(batch.state,device=DEVICE, dtype=torch.float32)
-                batch_reward = torch.tensor(batch.reward,device=DEVICE, dtype=torch.float32)
-                batch_nextState = torch.tensor(batch.next_state,device=DEVICE, dtype=torch.float32)
+                batch_action = torch.cat(batch.action)
+                batch_state = torch.cat(batch.state)
+                batch_reward = torch.cat(batch.reward)
+                batch_nextState = torch.cat(batch.next_state)
                 batch_done = batch.done
                 lossEpi[i] += agent.update_parameter(batch_action,batch_state,batch_reward,batch_nextState,batch_done)
             
@@ -49,6 +54,7 @@ def main():
                 break
         
         state, _= env.reset()
+        state = torch.tensor(state, dtype=torch.float32, device=DEVICE).unsqueeze(0)
         done = False
 
         if(((i % INTERVAL) == 0) and (i != 0)):

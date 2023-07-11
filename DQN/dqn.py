@@ -45,44 +45,36 @@ class DQN():
             with torch.no_grad():
                 logits = self.model(x)
                 #probab = nn.Softmax(dim=1)(logits)
-                predict = torch.argmax(logits).view(1,1)
+                predict = torch.argmax(logits).view(1,1).to(torch.int64)
         else:
-            predict = torch.tensor([[np.random.randint(0,2)]],device=DEVICE,dtype=torch.int32)
+            predict = torch.tensor([[np.random.randint(0,2)]],device=DEVICE,dtype=torch.int64,requires_grad=False)
 
         self.step+=1
-
         return predict
-    '''
-    def update_parameter(self, act, state, reward, next_state, done):
-        #reward = torch.clamp(rew, min=-1.0, max=1.0)
-        with torch.autocast(device_type=DEVICE, dtype=torch.float32):
-            if done == True:
-                y = reward
+ 
+    def computeMaxQ(self,reward,nextState,done):
+        retQList = []
+        with torch.no_grad():
+         for (r, n, d) in zip(reward, nextState, done):
+            if not d:
+                retQList.append(list(r + self.gamma * torch.max(self.model(n))))  
             else:
-                y = reward + (self.gamma * torch.max(self.model(next_state)).detach().clone().cuda())
-
-            x = self.model(state)[int(act.item())]
-
-        loss = self.loss_fn(x,y)
+                retQList.append(list(r))
         
-        self.optimizer.zero_grad()
-        loss.backward()
-        #nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.)
-        self.optimizer.step()
-    
-        return loss
-'''
+        return torch.tensor(retQList,device=DEVICE)
+
     def update_parameter(self, act, state, reward, next_state, done):
+        '''
         y = torch.tensor(tuple(map(lambda r,n,d:
                     r + (self.gamma * torch.max(self.model(n)).detach().clone().cuda())
                     if not d
                     else 
                     r
                 ,reward,next_state,done)), device=DEVICE).view(-1,1)
-        
+        '''        
+        y = self.computeMaxQ(reward,next_state,done)
         qList = self.model(state)
-        actList = act.view(-1,1)
-        x = torch.gather(qList,1,actList)
+        x = torch.gather(qList,1,act)
 
         loss = self.loss_fn(x,y)
         self.optimizer.zero_grad()

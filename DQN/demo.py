@@ -14,14 +14,17 @@ done = False
 action_his = np.array([])
 
 for i in tqdm(range(100)):
+    step = 0
     while(not done):
         action = agent.sample_action(torch.tensor(state, dtype=torch.float32, device=DEVICE).unsqueeze(0))
-        _, _ , ter, trun, _ = env.step(action)
+        state, _ , ter, trun, _ = env.step(action.item())
         done = (ter or trun)
-        action_his = np.append(action_his, action)
+        step += 1
+        #action_his = np.append(action_his, action)
 
     state, _ = env.reset()
     done = False
+    print(step)
         
 
 env.close()

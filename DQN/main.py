@@ -35,7 +35,7 @@ def main():
             rewardEpi[i] += reward
 
             next_state = torch.tensor(next_state,dtype=torch.float32,device=DEVICE).unsqueeze(0)
-            reward = torch.tensor(reward,dtype=torch.float32,device=DEVICE).unsqueeze(0)
+            reward = torch.tensor(reward,dtype=torch.float32,device=DEVICE).view(1,1)
 
             memory.add(action,state,reward,next_state,done)
             state = next_state
@@ -56,8 +56,8 @@ def main():
         state, _= env.reset()
         state = torch.tensor(state, dtype=torch.float32, device=DEVICE).unsqueeze(0)
         done = False
-
-        if(((i % INTERVAL) == 0) and (i != 0)):
+        
+        if ((i % INTERVAL) == 0) and (i != 0) :
             intrvlMax = max(rewardEpi[i-INTERVAL:i]) 
             intrvlMin = min(rewardEpi[i-INTERVAL:i])
             intrvlMean = np.mean(rewardEpi[i-INTERVAL:i])

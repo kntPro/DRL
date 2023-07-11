@@ -32,9 +32,8 @@ class DQN():
         self.model = Model(obsShape,actShape).to(DEVICE)
         #self.loss_fn = nn.SmoothL1Loss()
         self.loss_fn = nn.MSELoss()
-        #self.loss_fn = lambda pred,targ:torch.pow((targ-pred),2)
-        #self.optimizer = torch.optim.SGD(self.model.parameters(),lr=1e-3)
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01)
+        self.optimizer = torch.optim.Adam(self.model.parameters())
+        #self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01)
         self.gamma = gamma
         self.step = 0
         self.epsilon = lambda :max((EPSILON_COE-self.step)/EPSILON_COE, epsilon) #epsilon-annealing

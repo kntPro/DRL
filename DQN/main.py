@@ -19,8 +19,10 @@ def main():
     state = torch.tensor(state, dtype=torch.float32, device=DEVICE).unsqueeze(0)
     memory = DequeMemory(MEMORY)    
     agent = DQN(2,env.observation_space.shape[0],GAMMA,EPSILON)
-    rewardEpi = np.zeros(NUM_EPI)
-    lossEpi =  np.zeros(NUM_EPI)
+    rewardEpi = torch.zeros(NUM_EPI, dtype=torch.float32, device=DEVICE)
+    lossEpi = torch.zeros(NUM_EPI, dtype=torch.float32, device=DEVICE)
+    #rewardEpi = np.zeros(NUM_EPI)
+    #lossEpi =  np.zeros(NUM_EPI)
     done = False
     writer = SummaryWriter() 
     #train
@@ -58,12 +60,12 @@ def main():
         done = False
         
         if ((i % INTERVAL) == 0) and (i != 0) :
-            intrvlMax = max(rewardEpi[i-INTERVAL:i]) 
-            intrvlMin = min(rewardEpi[i-INTERVAL:i])
-            intrvlMean = np.mean(rewardEpi[i-INTERVAL:i])
-            lossMax = max(lossEpi[i-INTERVAL:i])
-            lossMean = np.mean(lossEpi[i-INTERVAL:i])
-            lossMin = min(lossEpi[i-INTERVAL:i])
+            intrvlMax = torch.max(rewardEpi[i-INTERVAL:i]).item() 
+            intrvlMin = torch.min(rewardEpi[i-INTERVAL:i]).item()
+            intrvlMean = torch.mean(rewardEpi[i-INTERVAL:i]).item()
+            lossMax = torch.max(lossEpi[i-INTERVAL:i]).item()
+            lossMean = torch.mean(lossEpi[i-INTERVAL:i]).item()
+            lossMin = torch.min(lossEpi[i-INTERVAL:i]).item()
 
             print(f'\n {i}:reward max:{intrvlMax}, mean:{intrvlMean}, min:{intrvlMin}')
             print(f' {i}:loss max:{lossMax}, mean:{lossMean}, min:{lossMin}\n')
@@ -79,6 +81,7 @@ def main():
 
     torch.save(agent.model,DQN_PARAM_PATH+str(NUM_EPI))
 
+'''
     fig = plt.figure()
     x = np.arange(len(rewardEpi))
     ax = fig.add_subplot(111)
@@ -87,7 +90,7 @@ def main():
     ax.plot(x,rewardEpi)
     plt.savefig('rewards')  
     #plt.show()
-        
+'''        
     
 
 if __name__=="__main__":

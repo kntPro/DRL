@@ -267,5 +267,9 @@ y = torch.tensor(tuple(map(lambda r,n,d:
                 ,rList,nList,dList)), device=DEVICE)
 print(y)
 '''
-qList = [[0,1] for _ in range(20)]
-act = [[random.randint(0,1)] ]
+a = torch.arange(10,dtype=torch.float32,device=DEVICE)
+print(a[3:7])
+print(torch.max(a[3:7]).item())
+print(torch.min(a[3:7]).item())
+print(torch.mean(a[3:7]).item())
+print(type(a[3:7]))
